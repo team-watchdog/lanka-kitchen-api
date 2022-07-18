@@ -8,7 +8,7 @@
     "build": "tsc",
     "serve": "node dist/index.js",
     "start": "npm run serve",
-    "watch-node": "nodemon dist/index.js",
+    "postinstall": "npm run build",
     "watch-ts": "tsc -w",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\"  \"npm run watch-ts\" \"npm run watch-node\""
   },
