@@ -1,0 +1,98 @@
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Account{
+    id          Int @id @default(autoincrement())
+    firstName   String
+    lastName    String
+    email       String @unique
+    contactNumber String
+    hashedPassword String
+    isActive   Boolean
+    verified    Boolean
+    userRoles   Int[]
+
+    organizationId Int
+    organization   Organization  @relation(fields: [organizationId], references: [id])
+
+    
+    resetPasswordHash String?
+    resetPasswordHashExpiry DateTime?
+
+    confirmEmailHash String?
+    confirmEmailHashExpiry DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model Location{
+  id         Int @id @default(autoincrement())
+  latitude   Float
+  longitude  Float
+  formattedAddress String
+  placeId String?
+  
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+}
+
+model Organization{
+    id          Int @id @default(autoincrement())
+    name        String
+    summary     String?
+    description String?
+    logoURL        String?
+    assistanceTypes String[]
+    assistanceFrequency String?
+    peopleReached String?
+
+    // contact details
+    phoneNumbers String[]
+    email String?
+    website String?
+    instagram String?
+    facebook String?
+    paymentLink String?
+
+    // bank details
+    bankName String?
+    accountNumber String?
+    accountName String?
+    accountType String?
+    branchName String?
+    notes String?
+
+    approved Boolean @default(false)
+
+    locations Location[]
+    accounts Account[]
+    invitations Invitation[]
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model Invitation{
+    id          Int @id @default(autoincrement())
+    firstName   String
+    lastName    String
+    email       String @unique
+    userRoles   Int[]
+    created     Boolean @default(false)
+
+    organizationId Int
+    organization   Organization  @relation(fields: [organizationId], references: [id])
+    
+    inviteTokenHash String?
+    inviteTokenHashExpiry DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
