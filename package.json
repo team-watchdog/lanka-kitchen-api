@@ -8,6 +8,7 @@
     "build": "prisma generate && tsc",
     "serve": "node dist/index.js",
     "start": "npm run serve",
+    "postinstall": "npm run build",
     "watch-node": "nodemon dist/index.js",
     "watch-ts": "tsc -w",
     "watch": "concurrently -k -p \"[{name}]\" -n \"TypeScript,Node\" -c \"yellow.bold,cyan.bold,green.bold\"  \"npm run watch-ts\" \"npm run watch-node\""
