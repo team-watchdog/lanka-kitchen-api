@@ -5,6 +5,7 @@ import sgMail from "@sendgrid/mail";
 import { generate } from "randomstring";
 import jwt from "jsonwebtoken";
 import moment from "moment";
+import { Prisma } from "@prisma/client";
 
 // errors
 import { CustomError } from "../shared/errors";
@@ -56,7 +57,7 @@ export class AuthResolver{
                 hashedPassword: hashedPassword,
                 confirmEmailHash: hashedVerifyCode,
                 confirmEmailHashExpiry: moment().add(3, "days").toDate(),
-                userRoles: [1],
+                userRoles: [2],
                 organization: {
                     create: {
                         name: data.organizationName,
@@ -78,28 +79,47 @@ export class AuthResolver{
         */
 
         // Generate Token
-        const token = jwt.sign({ id: account.id, userRoles: account.userRoles, organizationId: account.organizationId }, JWT_SECRET);
+        const token = jwt.sign({ id: account.id, userRoles: account.userRoles, organizationId: account.organizationId }, JWT_SECRET, { algorithm: "HS256" });
+
+        let newAccount = await prisma.account.findFirst({
+            where: {
+                id: account.id,
+            },
+            include: {
+                organization: true,
+            },
+        });
+
+        if (!newAccount) {
+            throw new CustomError("Account not found");
+        }
 
         return {
             account: {
-                ...account,
+                ...newAccount,
                 resetPasswordHash: null,
                 resetPasswordHashExpiry: null,
                 hashedPassword: "",
                 confirmEmailHash: null,
                 confirmEmailHashExpiry: null,
+                organization: {
+                    ...newAccount.organization,
+                    locations: newAccount?.organization?.locations ? newAccount.organization.locations as Prisma.JsonArray : [],
+                },
             },
             token,
         };
     }
 
-    @Authorized("auth.signin")
     @Mutation(() => AuthResponse, { nullable: true })
     async signIn(@Arg("data") data: SignInInput, @Ctx() ctx: Context): Promise<AuthResponse | null> {
         const account = await prisma.account.findFirst({
             where: {
                 email: data.email,
-            }
+            },
+            include: {
+                organization: true,
+            },
         });
         
         if (!account) throw new CustomError("Account not found");
@@ -109,12 +129,16 @@ export class AuthResolver{
         }
 
         // Generate Token
-        const token = jwt.sign({ id: account.id, userRoles: account.userRoles, organizationId: account.organizationId }, JWT_SECRET);
+        const token = jwt.sign({ id: account.id, userRoles: account.userRoles, organizationId: account.organizationId }, JWT_SECRET, { algorithm: "HS256" });
 
         return {
             token: token,
             account: {
                 ...account,
+                organization: {
+                    ...account.organization,        
+                    locations: account?.organization?.locations ? account.organization.locations as Prisma.JsonArray : [],
+                },
                 resetPasswordHash: null,
                 resetPasswordHashExpiry: null,
                 hashedPassword: "",
@@ -138,6 +162,20 @@ export class AuthResolver{
         const resetCode = generate(6);
         let hashedResetCode = await bcrypt.hash(resetCode, 10);
 
+        try {
+            await sgMail.send({
+                to: account.email,
+                from: 'contact@appendix.tech',
+                subject: 'Watchdog Foodbank: Reset password',
+                templateId: MailTemplates.PasswordResetTemplateId,
+                dynamicTemplateData: {
+                    passwordResetLink: `${APP_HOST_URL}/auth/reset-password?resetToken=${resetCode}&accountId=${account.id}`,
+                },
+            });
+        } catch (e) {
+            throw new CustomError("Error sending email");
+        }
+
         // Update account
         await prisma.account.update({
             where: {
@@ -154,6 +192,8 @@ export class AuthResolver{
 
     @Mutation(() => AuthStatusResponse, { nullable: true })
     async resetPassword(@Arg("data") data: ResetPasswordInput, @Ctx() ctx: Context): Promise<AuthStatusResponse | null> {
+        console.log(data);
+        
         const account = await prisma.account.findFirst({
             where: {
                 id: data.accountId,
@@ -166,7 +206,6 @@ export class AuthResolver{
         if (account.resetPasswordHash && !bcrypt.compareSync(data.resetCode, account.resetPasswordHash) && moment().isBefore(account.resetPasswordHashExpiry)) {
             throw new CustomError("Invalid reset code");
         }
-
         
         // Hash the new password
         let hashedPassword = await bcrypt.hash(data.password, 10);

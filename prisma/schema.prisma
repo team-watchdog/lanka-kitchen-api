@@ -7,6 +7,23 @@ generator client {
   provider = "prisma-client-js"
 }
 
+enum RequestType {
+  Ration
+  Equipment
+}
+
+enum RequestStatus {
+  Active
+  Completed
+}
+
+enum Unit {
+  Kg
+  L
+  ML
+  Nos
+}
+
 model Account{
     id          Int @id @default(autoincrement())
     firstName   String
@@ -35,11 +52,87 @@ model Account{
 model Organization{
     id          Int @id @default(autoincrement())
     name        String
+    profileImageUrl  String?
+    summary     String?
     description String?
+    assistanceTypes String[]
+    assistanceFrequency String?
+    peopleReached String?
+
+    // contact details
+    phoneNumbers String[]
+    email String?
+    website String?
+    instagram String?
+    facebook String?
+    twitter String?
+    paymentLink String?
+
+    // bank details
+    bankName String?
+    accountNumber String?
+    accountName String?
+    accountType String?
+    branchName String?
+    notes String?
+
     approved Boolean @default(false)
 
+    locations Json?
     accounts Account[]
+    invitations Invitation[]
+    requests Request[]
+    volunteerRequests VolunteerRequest[]
 
     createdAt DateTime @default(now())
     updatedAt DateTime @default(now())
+}
+
+model Invitation{
+    id          Int @id @default(autoincrement())
+    firstName   String
+    lastName    String
+    email       String @unique
+    userRoles   Int[]
+    created     Boolean @default(false)
+
+    organizationId Int
+    organization   Organization  @relation(fields: [organizationId], references: [id])
+    
+    inviteTokenHash String?
+    inviteTokenHashExpiry DateTime?
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @default(now())
+}
+
+model Request{
+  id         Int @id @default(autoincrement())
+  itemName  String
+  requestType RequestType @default(Ration)
+  placeId String?
+  unit Unit?
+  quantity Float
+  status RequestStatus @default(Active)
+
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+}
+
+model VolunteerRequest{
+  id         Int @id @default(autoincrement())
+  title  String
+  description  String
+  placeId String?
+  skills Json?
+  status RequestStatus @default(Active)
+
+  organizationId Int
+  organization   Organization  @relation(fields: [organizationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }

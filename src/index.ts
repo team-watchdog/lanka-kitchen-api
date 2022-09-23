@@ -5,7 +5,7 @@ import "reflect-metadata";
 import express from "express";
 import { buildSchema } from "type-graphql";
 import { ApolloServer } from "apollo-server-express";
-import { expressjwt as jwt } from "express-jwt";
+import { expressjwt as jwt, Request } from "express-jwt";
 
 // resolvers
 import { resolvers } from "./resolvers";
@@ -36,21 +36,22 @@ async function bootstrap(){
         context: ({ req }) => { 
             const context = {
                 req,
-                user: (req as AuthenticatedRequest).user,
+                user: (req as Request).auth,
             }
             return context;
          },
     });
 
-    await server.start();
-
     app.use(path, jwt({
         secret: JWT_SECRET,
         credentialsRequired: false,
         algorithms: ["HS256"],
+        
     }));
 
+    await server.start();
     server.applyMiddleware({ app, path });
+
     app.listen({ port: PORT }, () =>{
         console.log(`🚀 Server ready at http://localhost:${PORT}${server.graphqlPath}`);
     });

@@ -1,5 +1,23 @@
 import { Field, ID, Int, ObjectType } from "type-graphql";
 
+// types
+import { Organization } from "./organization.types";
+
+@ObjectType()
+export class UserRole{
+    @Field(type => Int)
+    id: number;
+
+    @Field()
+    label: string;
+
+    @Field()
+    description: string;
+
+    @Field(() => [String])
+    allowedActions: string[];
+}
+
 @ObjectType()
 export class Account{
     @Field(type => ID)
@@ -28,6 +46,12 @@ export class Account{
 
     @Field(type => [Int])
     userRoles: number[]
+
+    @Field(type => [UserRole], { nullable: true })
+    userRoleDefs?: UserRole[];
+
+    @Field(_ => Organization, { nullable: true })
+    organization: Organization | null;
 
     @Field(_ => String, { nullable: true })
     resetPasswordHash: string | null;

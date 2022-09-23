@@ -5,5 +5,6 @@ const SENDGRID_API_KEY = process.env.SENDGRID_API_KEY ?  process.env.SENDGRID_AP
 sgMail.setApiKey(SENDGRID_API_KEY);
 
 export const MailTemplates = {
-    PasswordResetTemplateId: '49d490f41d9d4fa38f977152a9d42c86',
+    PasswordResetTemplateId: 'd-804aa0e03d1444cca2a3f21b76792b90',
+    InviteTemplateId: 'd-58dca3836f584ba2ae82e2ba8038632c',
 }
