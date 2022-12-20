@@ -17,6 +17,7 @@ export const UserRoles: UserRole[] = [
             "organization.update",
             "organization.manageMembers",
             "organization.manageRequests",
+            "organization.moderate",
         ]
     },
     {

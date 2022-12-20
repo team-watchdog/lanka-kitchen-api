@@ -12,6 +12,7 @@ import { CustomError } from "../shared/errors";
 
 // prisma client
 import { prisma } from "../shared/db";
+import { isActionAllowed } from "../auth/permissions";
 
 @Resolver(of => Organization)
 export class OrganizationResolver {
@@ -147,17 +148,16 @@ export class OrganizationResolver {
     return true;
   }
 
-  @Authorized("organization.read")
   @Query(() => Organization, { nullable: true })
   async getOrganization(@Arg("id", () => Int) id: number, @Ctx() ctx: Context<AuthenticatedRequest>): Promise<Organization | null> {
     const { user } = ctx;
 
-    if (!user.organizationId) {
-        throw new CustomError("Organization not found", "ORGANIZATION_NOT_FOUND");
-    }
+    console.log(user);
+
     const organization = await prisma.organization.findFirst({
       where: {
         id,
+        approved: user && isActionAllowed('organization.moderate', user.userRoles) ? undefined : true,
       },
     });
 

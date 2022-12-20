@@ -51,6 +51,7 @@ export class VolunteerRequestResolver {
                 skills: data.skills,
                 status: data.status,
                 organizationId: user.organizationId,
+                updatedAt: new Date(),
             },
             where: {
                 id,
