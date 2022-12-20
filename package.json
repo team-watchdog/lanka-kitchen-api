@@ -20,8 +20,11 @@
     "@sendgrid/mail": "^7.7.0",
     "apollo-server": "^3.9.0",
     "apollo-server-express": "^3.9.0",
+    "aws-sdk": "^2.1278.0",
+    "axios": "^1.2.1",
     "bcrypt": "^5.0.1",
     "class-validator": "^0.13.2",
+    "dotenv": "^16.0.1",
     "express-jwt": "^7.7.5",
     "graphql": "^15.8.0",
     "jsonwebtoken": "^8.5.1",
@@ -33,7 +36,6 @@
     "ts-node": "^10.8.1",
     "type-graphql": "^1.1.1",
     "typescript": "^4.7.4",
-    "dotenv": "^16.0.1",
     "validator": "^13.7.0"
   },
   "devDependencies": {

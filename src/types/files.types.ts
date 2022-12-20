@@ -1,6 +1,15 @@
 import { ObjectType, Field, Int } from "type-graphql";
 
 @ObjectType()
+export class FileSignedURLPayload {
+    @Field()
+    signedRequest: string;
+
+    @Field()
+    url: string;
+}
+
+@ObjectType()
 export class File{
     @Field(_ => Int)
     id: number;
