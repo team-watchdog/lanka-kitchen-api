@@ -18,7 +18,11 @@ import { isActionAllowed } from "../auth/permissions";
 export class OrganizationResolver {
   @Query(() => [Organization])
   async getOrganizations(@Ctx() ctx: Context<AuthenticatedRequest>): Promise<Organization[]> {
-    const organizations = await prisma.organization.findMany({});
+    const organizations = await prisma.organization.findMany({
+      where: {
+        approved: true,
+      }
+    });
     return organizations as Organization[];
   }
 
