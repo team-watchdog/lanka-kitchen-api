@@ -156,7 +156,7 @@ export class OrganizationResolver {
   async getOrganization(@Arg("id", () => Int) id: number, @Ctx() ctx: Context<AuthenticatedRequest>): Promise<Organization | null> {
     const { user } = ctx;
 
-    const approved = user.organizationId === id || isActionAllowed('organization.moderate', user.userRoles) ? undefined : true;
+    const approved = user && (user.organizationId === id || isActionAllowed('organization.moderate', user.userRoles)) ? undefined : true;
 
     const organization = await prisma.organization.findFirst({
       where: {
