@@ -1,5 +1,5 @@
 # Lanka Kitchen API
-![Lanka Kitchen Logo](/assets/logo.png)
+![Lanka Kitchen Logo](/assets/logo-bg.png)
 
 Lanka Kitchen is an initiative by Team Watchdog to help community kitchens, ration groups, and other mutual aid organizations run their operations smoother and get support from the communities they serve.
 
